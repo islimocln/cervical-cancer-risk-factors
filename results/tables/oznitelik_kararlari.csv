@@ -1,0 +1,37 @@
+﻿sütun,grup,eksik,karar,gerekçe
+Age,Demografi / cinsel öykü,0,TUT,Eksik yok. Uç değerler klinik olarak mümkün.
+Number of sexual partners,Demografi / cinsel öykü,26,TUT + impute,26 eksik.
+First sexual intercourse,Demografi / cinsel öykü,7,TUT + impute,7 eksik; yaştan büyük 2 değer → NaN.
+Num of pregnancies,Demografi / cinsel öykü,56,TUT + impute,56 eksik; eksiklerde biyopsi+ oranı yüksek.
+Smokes,Sigara,13,ÇIKAR (türetilmiş),Smokes (years) > 0 ile birebir aynı.
+Smokes (years),Sigara,13,TUT + impute,13 eksik. Sağa çarpık.
+Smokes (packs/year),Sigara,13,TUT + impute,13 eksik. Sağa çarpık; bazı değerler 'yıl' ile aynı (şüpheli).
+Hormonal Contraceptives,Hormonal kontraseptif,108,ÇIKAR (türetilmiş),HC (years) > 0 ile birebir aynı.
+Hormonal Contraceptives (years),Hormonal kontraseptif,108,TUT + impute + gösterge,108 eksik; eksiklerde biyopsi+ = 0.
+IUD,RİA (IUD),117,ÇIKAR (türetilmiş),IUD (years) > 0 ile birebir aynı.
+IUD (years),RİA (IUD),117,TUT + impute + gösterge,117 eksik.
+STDs,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (türetilmiş),STDs (number) > 0 ile birebir aynı.
+STDs (number),Cinsel yolla bulaşan hastalık (CYBH),105,TUT + impute + gösterge,105 eksik (blok halinde).
+STDs:condylomatosis,Cinsel yolla bulaşan hastalık (CYBH),105,TUT + impute,44 pozitif.
+STDs:cervical condylomatosis,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (sabit),Hiç pozitif yok.
+STDs:vaginal condylomatosis,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (çok nadir),4 pozitif.
+STDs:vulvo-perineal condylomatosis,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (tekrar),condylomatosis ile r ≈ 0.99.
+STDs:syphilis,Cinsel yolla bulaşan hastalık (CYBH),105,TUT + impute,18 pozitif.
+STDs:pelvic inflammatory disease,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (çok nadir),1 pozitif.
+STDs:genital herpes,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (çok nadir),1 pozitif.
+STDs:molluscum contagiosum,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (çok nadir),1 pozitif.
+STDs:AIDS,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (sabit),Hiç pozitif yok.
+STDs:HIV,Cinsel yolla bulaşan hastalık (CYBH),105,TUT + impute,18 pozitif.
+STDs:Hepatitis B,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (çok nadir),1 pozitif.
+STDs:HPV,Cinsel yolla bulaşan hastalık (CYBH),105,ÇIKAR (çok nadir),2 pozitif; HPV bilgisi Dx:HPV'de daha dolu.
+STDs: Number of diagnosis,Cinsel yolla bulaşan hastalık (CYBH),0,ÇIKAR (gizli eksik),CYBH cevapsızlarda 0 yazılmış; STDs (number) ile örtüşüyor.
+STDs: Time since first diagnosis,Cinsel yolla bulaşan hastalık (CYBH),787,ÇIKAR (yapısal eksik),%92 tanımsız; yalnızca 71 hastada anlamlı.
+STDs: Time since last diagnosis,Cinsel yolla bulaşan hastalık (CYBH),787,ÇIKAR (yapısal eksik),%92 tanımsız; first ile r ≈ 0.93.
+Dx:Cancer,Önceki tanılar (Dx),0,TUT,18 pozitif. Dx:HPV ile büyük örtüşme (yorumda dikkat).
+Dx:CIN,Önceki tanılar (Dx),0,TUT,9 pozitif.
+Dx:HPV,Önceki tanılar (Dx),0,TUT,18 pozitif.
+Dx,Önceki tanılar (Dx),0,ÇIKAR (türetilmiş + tutarsız),Alt sütunların 'veya'sı; 5 satırda tutarsız.
+Hinselmann,Hedef / tarama testleri,0,ÇIKAR (sızıntı),Aynı muayenenin test sonucu.
+Schiller,Hedef / tarama testleri,0,ÇIKAR (sızıntı),Aynı muayenenin test sonucu.
+Citology,Hedef / tarama testleri,0,ÇIKAR (sızıntı),Aynı muayenenin test sonucu.
+Biopsy,Hedef / tarama testleri,0,HEDEF,Altın standart; 55 pozitif (%6.4).

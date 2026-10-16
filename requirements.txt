@@ -1,0 +1,9 @@
+pandas>=2.2
+numpy>=2.0
+matplotlib>=3.9
+seaborn>=0.13
+scikit-learn>=1.5
+shap>=0.46
+jupyterlab>=4.2
+ipykernel>=6.29
+statsmodels>=0.14

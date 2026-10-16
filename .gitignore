@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Kişisel deneme notebook'u (rapora girmez)
+notebooks/00_oyun_alani.ipynb
+
+# LaTeX ara dosyaları
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.synctex.gz
+report/*.fdb_latexmk
+report/*.fls
+report/*.bbl
+report/*.blg
+
+# Editör / işletim sistemi
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Veri seti (UCI'den indirilir, depoya yüklenmez)
+data/*.csv

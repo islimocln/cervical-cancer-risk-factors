@@ -4,11 +4,13 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 from scipy import stats
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.experimental import enable_iterative_imputer  # noqa: F401  (IterativeImputer için gerekli)
 from sklearn.impute import IterativeImputer, SimpleImputer
+from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold, cross_val_predict
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
@@ -173,6 +175,90 @@ def little_mcar_test(df):
         dof += o.sum()
     dof -= p
     return d2, dof, stats.chi2.sf(d2, dof), len(patterns)
+
+
+def oof_predictions(estimator, X, y, n_repeats=10, n_splits=5, seed=42, groups=None):
+    """Tekrarlı katmanlı CV ile her hasta için 'dışarıda bırakılmış' (out-of-fold) olasılık tahmini.
+
+    Her tekrarda her hasta tam olarak bir kez test kümesindedir; tahmini, o hastayı hiç görmemiş
+    bir model üretir. Döndürür: (n_repeats, n_hasta) boyutunda olasılık matrisi.
+
+    groups: verilirse StratifiedGroupKFold kullanılır; aynı gruptaki satırlar (ör. aynı hasta
+    olabilecek birebir tekrar eden kayıtlar) hiçbir zaman hem eğitimde hem testte bulunmaz.
+    """
+    out = np.empty((n_repeats, len(y)))
+    for r in range(n_repeats):
+        if groups is None:
+            cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed + r)
+        else:
+            cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed + r)
+        out[r] = cross_val_predict(estimator, X, y, groups=groups, cv=cv,
+                                   method="predict_proba", n_jobs=-1)[:, 1]
+    return out
+
+
+def duplicate_groups(df):
+    """Birebir aynı satırlara ortak bir grup numarası verir; diğer her satır kendi grubudur.
+
+    Veride hasta kimliği yok. Tamamen aynı kayıtlar aynı hastanın tekrar girilmiş satırı olabilir;
+    bu gruplar GroupKFold türü bölmede eğitim ve test arasında bölünmez.
+    """
+    return df.groupby(list(df.columns), dropna=False, sort=False).ngroup().to_numpy()
+
+
+def calibration_stats(y, p, eps=1e-4):
+    """Kalibrasyon özetleri.
+
+    - ort_tahmin / gözlenen: ortalama tahmin edilen risk ve gerçek pozitif oranı
+    - O/E: gözlenen / beklenen (1 = mükemmel; <1 → model riski abartıyor)
+    - kesişim (calibration-in-the-large): 0 = mükemmel; tahminler logit ölçeğinde sabit tutularak
+    - eğim: 1 = mükemmel; <1 → tahminler fazla uç (aşırı güvenli), >1 → fazla ılımlı
+    """
+    y = np.asarray(y, dtype=float)
+    p = np.clip(np.asarray(p, dtype=float), eps, 1 - eps)
+    lp = np.log(p / (1 - p))
+    ones = np.ones_like(lp)
+    intercept = sm.GLM(y, ones, family=sm.families.Binomial(), offset=lp).fit().params[0]
+    slope = sm.GLM(y, np.column_stack([ones, lp]), family=sm.families.Binomial()).fit().params[1]
+    return {"ort_tahmin": p.mean(), "gözlenen": y.mean(), "O/E": y.mean() / p.mean(),
+            "kesişim": intercept, "eğim": slope}
+
+
+def net_benefit(y, p, thresholds):
+    """Karar eğrisi analizi (Vickers & Elkin, 2006) için net fayda.
+
+    Eşik pt: "riski pt'den büyükse biyopsi yap" kuralı.
+    Net fayda = TP/n − FP/n × pt/(1−pt). Döndürür: (model, herkese yap) net fayda dizileri.
+    """
+    y = np.asarray(y)
+    n, prev = len(y), y.mean()
+    model, treat_all = [], []
+    for t in thresholds:
+        pos = p >= t
+        tp = np.sum(pos & (y == 1))
+        fp = np.sum(pos & (y == 0))
+        w = t / (1 - t)
+        model.append(tp / n - fp / n * w)
+        treat_all.append(prev - (1 - prev) * w)
+    return np.array(model), np.array(treat_all)
+
+
+def bootstrap(y, preds, metric, n_boot=2000, seed=0):
+    """Hastaları yerine koyarak yeniden örnekleyip her model için metriğin dağılımını çıkarır.
+
+    preds: {model_adı: olasılık dizisi}. Tüm modeller AYNI örneklemlerde değerlendirilir, böylece
+    farkların güven aralığı da hesaplanabilir. Pozitif içermeyen örneklemler atlanır.
+    Döndürür: DataFrame (satır = bootstrap örneği, sütun = model)
+    """
+    y = np.asarray(y)
+    rng = np.random.default_rng(seed)
+    rows = []
+    while len(rows) < n_boot:
+        idx = rng.integers(0, len(y), len(y))
+        if y[idx].sum() == 0:
+            continue
+        rows.append({m: metric(y[idx], p[idx]) for m, p in preds.items()})
+    return pd.DataFrame(rows)
 
 
 def wilson_ci(k, n, alpha=0.05):

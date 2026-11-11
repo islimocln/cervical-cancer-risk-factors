@@ -20,7 +20,7 @@ Aynı muayenede yapılan `Hinselmann`, `Schiller` ve `Citology` testleri **veri 
 | Veri inceleme ve öznitelik seçimi | [`01_veri_inceleme.ipynb`](notebooks/01_veri_inceleme.ipynb) | ✅ |
 | Eksik veri mekanizması (MCAR/MAR/MNAR) | [`02_eksik_veri_analizi.ipynb`](notebooks/02_eksik_veri_analizi.ipynb) | ✅ |
 | Göstergeli ve göstergesiz imputasyon (Pipeline) | [`03_imputasyon_modelleme.ipynb`](notebooks/03_imputasyon_modelleme.ipynb) | ✅ |
-| PR-AUC, kalibrasyon, karar eğrisi, bootstrap | `04_degerlendirme.ipynb` | ⏳ |
+| ROC, PR-AUC, kalibrasyon, karar eğrisi, bootstrap, bölme duyarlılığı | [`04_degerlendirme.ipynb`](notebooks/04_degerlendirme.ipynb) | ✅ |
 | SHAP ve etik tartışma | `05_shap_yorumlama.ipynb` | ⏳ |
 | LaTeX rapor | `report/` | ⏳ |
 
@@ -50,6 +50,19 @@ Aynı muayenede yapılan `Hinselmann`, `Schiller` ve `Citology` testleri **veri 
 - Eksiklik göstergeleri ROC-AUC'u artırma eğiliminde (+0.03, p ≈ 0.055), PR-AUC'u neredeyse değiştirmiyor.
 - MICE, basit medyan imputasyonundan daha iyi sonuç vermedi.
 
+**04 · Değerlendirme** (10 tekrarın ortalama OOF tahmini, 858 hastanın tamamında; %95 GA: 2000 bootstrap)
+
+| Model | PR-AUC [%95 GA] | ROC-AUC [%95 GA] | Kalibrasyon eğimi | O/E |
+|---|---|---|---|---|
+| Lojistik regresyon · medyan + grup göstergesi (LR·C) | 0.144 [0.09–0.23] | 0.637 [0.55–0.72] | 0.63 | 0.97 |
+| **Rastgele orman · medyan + grup göstergesi (RF·C)** | **0.157 [0.10–0.25]** | **0.700 [0.62–0.77]** | **0.92** | **1.00** |
+
+- **Dört klinik grafik:** ROC, PR, kalibrasyon ve karar eğrisi (`report/sekiller/`).
+- **Kalibrasyon:** RF·C iyi kalibre. LR·C aşırı güvenli (eğim ≈ 0.63) → bir sonraki adım düzenlileştirme. Platt kalibrasyonu RF·C'ye katkı sağlamadı.
+- **Karar eğrisi:** RF·C yalnızca ≈%5–15 eşik aralığında "herkese / kimseye biyopsi" stratejilerinden iyi; kazanç 100 hastada ≈0.6–1.4 ek net doğru pozitif.
+- **Eksiklik göstergesi:** Genel metrikleri anlamlı değiştirmiyor (bootstrap farkı 0'ı içeriyor), ama hormonal kontraseptif sorusunu cevaplamayanlara verilen riski belirgin şekilde düşürüyor (etik açıdan 05'te tartışılacak).
+- **Bölme duyarlılığı:** Birebir aynı 43 satır (20 grup) StratifiedGroupKFold ile aynı katta tutulunca PR-AUC ve ROC-AUC ≈0.007 düşüyor; sonuçlar ve model sıralaması değişmiyor.
+
 ## Dizin yapısı
 
 ```
@@ -58,9 +71,10 @@ cervical_cancer_risk_factor/
 ├── notebooks/             analiz adımları (01 → 05 sırayla çalıştırılır)
 ├── src/utils.py           veri temizleme, Pipeline, Little MCAR testi, istatistik fonksiyonları
 ├── results/
-│   ├── figures/           rapora girecek grafikler
+│   ├── figures/           tüm grafikler
 │   └── tables/            metrik ve test tabloları
 ├── report/                LaTeX rapor
+│   └── sekiller/          rapora girecek dört klinik grafik (ROC, PR, kalibrasyon, karar eğrisi)
 ├── requirements.txt
 └── README.md
 ```
@@ -70,6 +84,7 @@ cervical_cancer_risk_factor/
 - **Sızıntı önleme:** İmputasyon, ölçekleme ve eksiklik göstergeleri `Pipeline` içinde; her çapraz doğrulama katında yalnızca eğitim verisinden öğrenilir.
 - **Ham veri değiştirilmez:** Veri hataları `src/utils.py` içindeki `clean()` fonksiyonuyla her çalıştırmada bellekte düzeltilir.
 - **Satır silinmez:** Complete-case analizi pozitif örneklerin %18'ini ve eksikliğin taşıdığı bilgiyi kaybettirir.
+- **Bölme stratejisi:** Veride hasta kimliği yok; her satır bir hasta varsayılıyor. Pozitif oranı düşük olduğu için katmanlı 5 kat × 10 tekrar kullanıldı. Birebir aynı satırların aynı hasta olabileceği ihtimaline karşı StratifiedGroupKFold ile duyarlılık analizi yapıldı. Aynı hastaya ait ama birebir aynı olmayan kayıtlar tespit edilemiyor (sınırlılık).
 - **Model karşılaştırması:** Tekrarlı CV'de katlar bağımsız olmadığı için Nadeau-Bengio düzeltilmiş t-testi kullanıldı.
 
 ## Çalıştırma
@@ -100,3 +115,4 @@ Notebook'lar `notebooks/` klasörü içinden çalıştırılmalıdır (veri yoll
 - Little RJA. *A test of missing completely at random for multivariate data with missing values.* JASA 1988;83(404):1198–1202.
 - Nadeau C, Bengio Y. *Inference for the generalization error.* Machine Learning 2003;52:239–281.
 - Rubin DB. *Inference and missing data.* Biometrika 1976;63(3):581–592.
+- Vickers AJ, Elkin EB. *Decision curve analysis: a novel method for evaluating prediction models.* Medical Decision Making 2006;26(6):565–574.

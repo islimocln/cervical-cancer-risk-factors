@@ -21,7 +21,7 @@ Aynı muayenede yapılan `Hinselmann`, `Schiller` ve `Citology` testleri **veri 
 | Eksik veri mekanizması (MCAR/MAR/MNAR) | [`02_eksik_veri_analizi.ipynb`](notebooks/02_eksik_veri_analizi.ipynb) | ✅ |
 | Göstergeli ve göstergesiz imputasyon (Pipeline) | [`03_imputasyon_modelleme.ipynb`](notebooks/03_imputasyon_modelleme.ipynb) | ✅ |
 | ROC, PR-AUC, kalibrasyon, karar eğrisi, bootstrap, bölme duyarlılığı | [`04_degerlendirme.ipynb`](notebooks/04_degerlendirme.ipynb) | ✅ |
-| SHAP ve etik tartışma | `05_shap_yorumlama.ipynb` | ⏳ |
+| SHAP ile yorumlama ve eksiklik göstergesinin etik tartışması | [`05_shap_yorumlama.ipynb`](notebooks/05_shap_yorumlama.ipynb) | ✅ |
 | LaTeX rapor | `report/` | ⏳ |
 
 ## Şu ana kadarki bulgular
@@ -62,6 +62,15 @@ Aynı muayenede yapılan `Hinselmann`, `Schiller` ve `Citology` testleri **veri 
 - **Karar eğrisi:** RF·C yalnızca ≈%5–15 eşik aralığında "herkese / kimseye biyopsi" stratejilerinden iyi; kazanç 100 hastada ≈0.6–1.4 ek net doğru pozitif.
 - **Eksiklik göstergesi:** Genel metrikleri anlamlı değiştirmiyor (bootstrap farkı 0'ı içeriyor), ama hormonal kontraseptif sorusunu cevaplamayanlara verilen riski belirgin şekilde düşürüyor (etik açıdan 05'te tartışılacak).
 - **Bölme duyarlılığı:** Birebir aynı 43 satır (20 grup) StratifiedGroupKFold ile aynı katta tutulunca PR-AUC ve ROC-AUC ≈0.007 düşüyor; sonuçlar ve model sıralaması değişmiyor.
+
+**05 · SHAP ile yorumlama** (out-of-fold SHAP, 04 ile aynı 10 bölme; katkılar yüzde puan, yp)
+
+- **Tek bir baskın öznitelik yok.** Grup düzeyinde CYBH (≈%23), demografi / cinsel öykü (≈%22), hormonal kontraseptif (≈%16) ve önceki tanılar (≈%14). Önem sıralaması 10 tekrar arasında kararlı (Spearman ρ ≈ 0.99).
+- **En belirgin örüntüler:** 10 yılın üzerinde hormonal kontraseptif kullanımı (≈+10 yp), CYBH öyküsü (≈+3–5 yp), önceki HPV / kanser tanısı (≈+6–11 yp), 45 yaş üstü (≈+4 yp). Hepsi küçük alt gruplara dayanıyor.
+- **Eksiklik göstergeleri** toplam önemin ≈%12'sini taşıyor. Hormonal kontraseptif sorusunu cevaplamayan hastada tahmin %6.4'ten %2.4'e iniyor; bu düşüşün 3.9 / 4.0 yp'si eksiklik kaynaklı, hastanın bildirdiği özelliklerin katkısı yalnızca −0.1 yp.
+- **Göstergeyi çıkarmak bunu önlemiyor:** göstergesiz model de medyanla doldurulmuş değerler üzerinden riski 1.9 yp düşürüyor (HK yılı medyanı 0.5; cevaplayan 750 hastanın yalnızca 25'inde bu değer var).
+- **Etik:** "Soruyu cevaplamadı → riski düşük" kuralı tek merkeze özgü, 0/108 gözlemine dayanıyor ve bilgi vermeyen hastayı ödüllendiriyor. Model bu hastalarda biyopsi yönlendirmesini azaltmak için kullanılmamalı.
+- **Açık konu:** `Dx` sütunlarının biyopsiden önce bilindiği varsayılıyor; bu sütunlar olmadan duyarlılık analizi yapılacak.
 
 ## Dizin yapısı
 

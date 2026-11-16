@@ -67,7 +67,7 @@ Aynı muayenede yapılan `Hinselmann`, `Schiller` ve `Citology` testleri **veri 
 
 ```
 cervical_cancer_risk_factor/
-├── data/                  ham veri (depoda yok; UCI'den indirilir, bkz. Çalıştırma)
+├── data/                  ham veri (depoda yok; indirme talimatı: data/README.md)
 ├── notebooks/             analiz adımları (01 → 05 sırayla çalıştırılır)
 ├── src/utils.py           veri temizleme, Pipeline, Little MCAR testi, istatistik fonksiyonları
 ├── results/
@@ -75,6 +75,7 @@ cervical_cancer_risk_factor/
 │   └── tables/            metrik ve test tabloları
 ├── report/                LaTeX rapor
 │   └── sekiller/          rapora girecek dört klinik grafik (ROC, PR, kalibrasyon, karar eğrisi)
+├── sunum/                 ara sunum (ara-sunum.pdf)
 ├── requirements.txt
 └── README.md
 ```
